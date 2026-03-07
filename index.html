@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Smart Campus Canteen - Commandez vos repas à l'avance, gérez votre budget et évitez les files d'attente.">
+    <title>Smart Campus Canteen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- LOGIN OVERLAY -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="login-logo-icon"><i class="fas fa-utensils"></i></div>
+                    <h1>SmartCanteen</h1>
+                    <p>Connectez-vous pour accéder à la cantine</p>
+                </div>
+                <form id="login-form" onsubmit="return handleLogin(event)">
+                    <div class="login-field">
+                        <label for="login-name"><i class="fas fa-user"></i> Nom complet</label>
+                        <input type="text" id="login-name" placeholder="Ex: Ange Kouadio" required>
+                    </div>
+                    <div class="login-field">
+                        <label for="login-student-id"><i class="fas fa-id-card"></i> Numéro étudiant</label>
+                        <input type="text" id="login-student-id" placeholder="Ex: ETU-2026-001" required>
+                    </div>
+                    <div class="login-field">
+                        <label for="login-password"><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="login-password" placeholder="Votre mot de passe" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+                <div class="login-footer">
+                    <span>Première visite? Entrez vos infos pour créer un compte.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="bg-animated">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" id="nav-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <span class="logo-text">SmartCanteen</span>
+            </a>
+            <div class="nav-links" id="nav-links">
+                <a href="#home" class="nav-link active" data-section="home">
+                    <i class="fas fa-home"></i> Accueil
+                </a>
+                <a href="#menu" class="nav-link" data-section="menu">
+                    <i class="fas fa-book-open"></i> Menu
+                </a>
+                <a href="#order" class="nav-link" data-section="order">
+                    <i class="fas fa-shopping-cart"></i> Commander
+                </a>
+                <a href="#budget" class="nav-link" data-section="budget">
+                    <i class="fas fa-wallet"></i> Budget
+                </a>
+                <a href="#nutrition" class="nav-link" data-section="nutrition">
+                    <i class="fas fa-heartbeat"></i> Nutrition
+                </a>
+                <a href="#rewards" class="nav-link" data-section="rewards">
+                    <i class="fas fa-trophy"></i> Récompenses
+                </a>
+                <a href="#deals" class="nav-link" data-section="deals">
+                    <i class="fas fa-tags"></i> Anti-Gaspi
+                </a>
+                <a href="#marketplace" class="nav-link" data-section="marketplace">
+                    <i class="fas fa-store"></i> Business
+                </a>
+            </div>
+            <div class="nav-right">
+                <button class="theme-toggle" id="theme-toggle" title="Changer le thème">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+                <div class="notification-bell" id="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notif-badge">3</span>
+                </div>
+                <div class="user-avatar" id="user-avatar" title="Mon profil">
+                    <span class="user-avatar-letter" id="user-avatar-letter">?</span>
+                </div>
+                <button class="btn-logout" id="btn-logout" title="Se déconnecter">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <button class="mobile-toggle" id="mobile-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- ==================== HOME SECTION ==================== -->
+        <section id="home" class="section section-home active">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div class="hero-badge animate-fade-in">
+                        <i class="fas fa-sparkles"></i> La cantine intelligente du campus
+                    </div>
+                    <h1 class="hero-title animate-fade-in">
+                        Plus de <span class="gradient-text">files d'attente</span>,
+                        plus de <span class="gradient-text-2">gaspillage</span>
+                    </h1>
+                    <p class="hero-subtitle animate-fade-in">
+                        Commandez vos repas à l'avance, suivez votre nutrition et gérez votre budget — le tout depuis
+                        votre téléphone.
+                    </p>
+                    <div class="hero-actions animate-fade-in">
+                        <button class="btn btn-primary btn-lg" onclick="navigateTo('menu')">
+                            <i class="fas fa-utensils"></i> Voir le menu
+                        </button>
+                        <button class="btn btn-glass btn-lg" onclick="navigateTo('order')">
+                            <i class="fas fa-bolt"></i> Commander maintenant
+                        </button>
+                    </div>
+                    <div class="hero-stats animate-fade-in">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-count="1247">0</div>
+                            <div class="hero-stat-label">Commandes aujourd'hui</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-count="18">0</div>
+                            <div class="hero-stat-label">Min d'attente</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-count="95">0</div>
+                            <div class="hero-stat-label">% Satisfaction</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual animate-slide-in">
+                    <div class="hero-card-stack">
+                        <div class="hero-floating-card card-1">
+                            <div class="floating-card-icon"><i class="fas fa-clock"></i></div>
+                            <div class="floating-card-text">
+                                <strong>Prêt dans</strong>
+                                <span class="countdown-text">12 min</span>
+                            </div>
+                        </div>
+                        <div class="hero-floating-card card-2">
+                            <div class="floating-card-icon"><i class="fas fa-fire"></i></div>
+                            <div class="floating-card-text">
+                                <strong>820 kcal</strong>
+                                <span>Aujourd'hui</span>
+                            </div>
+                        </div>
+                        <div class="hero-floating-card card-3">
+                            <div class="floating-card-icon"><i class="fas fa-star"></i></div>
+                            <div class="floating-card-text">
+                                <strong>15 pts</strong>
+                                <span>Encore 5 pour un repas gratuit!</span>
+                            </div>
+                        </div>
+                        <div class="hero-phone-mockup">
+                            <div class="phone-screen">
+                                <div class="phone-header">
+                                    <span class="phone-time">13:05</span>
+                                    <div class="phone-icons">
+                                        <i class="fas fa-wifi"></i>
+                                        <i class="fas fa-battery-three-quarters"></i>
+                                    </div>
+                                </div>
+                                <div class="phone-content">
+                                    <div class="phone-greeting">Bonjour, Ange! 👋</div>
+                                    <div class="phone-menu-preview">
+                                        <div class="phone-menu-item">
+                                            <span>🍛</span>
+                                            <div>
+                                                <strong>Riz + Poulet</strong>
+                                                <small>1000 FCFA</small>
+                                            </div>
+                                        </div>
+                                        <div class="phone-menu-item">
+                                            <span>🥤</span>
+                                            <div>
+                                                <strong>Jus de fruits</strong>
+                                                <small>400 FCFA</small>
+                                            </div>
+                                        </div>
+                                        <div class="phone-menu-item">
+                                            <span>🍝</span>
+                                            <div>
+                                                <strong>Spaghetti</strong>
+                                                <small>800 FCFA</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="phone-btn">Commander 🚀</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wait Time Widget -->
+            <div class="wait-time-banner animate-fade-in">
+                <div class="wait-time-content">
+                    <div class="wait-time-icon pulse-animation">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="wait-time-info">
+                        <h3>Temps d'attente actuel</h3>
+                        <div class="wait-time-display">
+                            <span class="wait-minutes" id="wait-minutes">18</span>
+                            <span class="wait-label">minutes</span>
+                        </div>
+                    </div>
+                    <div class="wait-time-separator"></div>
+                    <div class="wait-time-suggestion">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>Meilleur moment pour venir</strong>
+                            <span class="best-time" id="best-time">13h05</span>
+                        </div>
+                    </div>
+                    <div class="wait-time-chart">
+                        <div class="chart-bar" style="height: 30%;" data-time="11h"></div>
+                        <div class="chart-bar" style="height: 60%;" data-time="12h"></div>
+                        <div class="chart-bar active" style="height: 90%;" data-time="13h"></div>
+                        <div class="chart-bar" style="height: 45%;" data-time="14h"></div>
+                        <div class="chart-bar" style="height: 20%;" data-time="15h"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MENU SECTION ==================== -->
+        <section id="menu" class="section section-menu">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-badge"><i class="fas fa-calendar-day"></i> Menu du jour</div>
+                    <h2 class="section-title">Découvrez le <span class="gradient-text">menu</span></h2>
+                    <p class="section-subtitle">Vendredi 06 Mars 2026 — Frais et préparé avec soin</p>
+                </div>
+
+                <div class="menu-categories" id="menu-categories">
+                    <button class="menu-cat-btn active" data-category="all">
+                        <i class="fas fa-th-large"></i> Tout
+                    </button>
+                    <button class="menu-cat-btn" data-category="plat">
+                        <i class="fas fa-drumstick-bite"></i> Plats
+                    </button>
+                    <button class="menu-cat-btn" data-category="accompagnement">
+                        <i class="fas fa-seedling"></i> Accompagnements
+                    </button>
+                    <button class="menu-cat-btn" data-category="boisson">
+                        <i class="fas fa-glass-water"></i> Boissons
+                    </button>
+                    <button class="menu-cat-btn" data-category="dessert">
+                        <i class="fas fa-ice-cream"></i> Desserts
+                    </button>
+                </div>
+
+                <div class="menu-grid" id="menu-grid">
+                    <!-- Menu items will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ORDER SECTION ==================== -->
+        <section id="order" class="section section-order">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-badge"><i class="fas fa-shopping-bag"></i> Commander</div>
+                    <h2 class="section-title">Votre <span class="gradient-text">commande</span></h2>
+                    <p class="section-subtitle">Sélectionnez vos plats et récupérez-les sans faire la queue</p>
+                </div>
+
+                <div class="order-layout">
+                    <div class="order-items-panel">
+                        <div class="order-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="order-search-input" placeholder="Rechercher un plat...">
+                        </div>
+                        <div class="order-items-list" id="order-items-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="order-cart-panel">
+                        <div class="cart-header">
+                            <h3><i class="fas fa-shopping-cart"></i> Mon Panier</h3>
+                            <button class="btn-clear-cart" id="btn-clear-cart">
+                                <i class="fas fa-trash"></i> Vider
+                            </button>
+                        </div>
+                        <div class="cart-items" id="cart-items">
+                            <div class="cart-empty">
+                                <i class="fas fa-cart-plus"></i>
+                                <p>Votre panier est vide</p>
+                                <small>Ajoutez des plats depuis le menu</small>
+                            </div>
+                        </div>
+                        <div class="cart-summary" id="cart-summary" style="display:none;">
+                            <div class="cart-summary-row">
+                                <span>Sous-total</span>
+                                <span id="cart-subtotal">0 FCFA</span>
+                            </div>
+                            <div class="cart-summary-row">
+                                <span>Calories totales</span>
+                                <span id="cart-calories">0 kcal</span>
+                            </div>
+                            <div class="cart-summary-row total">
+                                <span>Total</span>
+                                <span id="cart-total">0 FCFA</span>
+                            </div>
+                        </div>
+                        <div class="cart-student-info" id="cart-student-info" style="display:none;">
+                            <label for="student-name">Votre nom (pour l'étiquette)</label>
+                            <input type="text" id="student-name" placeholder="Entrez votre nom...">
+                        </div>
+                        <button class="btn btn-primary btn-block" id="btn-place-order" disabled>
+                            <i class="fas fa-check-circle"></i> Confirmer la commande
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== BUDGET SECTION ==================== -->
+        <section id="budget" class="section section-budget">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-badge"><i class="fas fa-coins"></i> Budget Smart</div>
+                    <h2 class="section-title">Suggestion selon votre <span class="gradient-text">budget</span></h2>
+                    <p class="section-subtitle">Entrez votre budget et nous vous proposons la meilleure combinaison</p>
+                </div>
+
+                <div class="budget-layout">
+                    <div class="budget-input-panel">
+                        <div class="budget-card glass-card">
+                            <div class="budget-input-group">
+                                <label for="budget-amount">💰 Votre budget</label>
+                                <div class="budget-input-wrapper">
+                                    <input type="number" id="budget-amount" placeholder="1500" min="100" step="100"
+                                        value="1500">
+                                    <span class="budget-currency">FCFA</span>
+                                </div>
+                            </div>
+                            <div class="budget-presets">
+                                <button class="budget-preset" data-amount="500">500</button>
+                                <button class="budget-preset" data-amount="1000">1000</button>
+                                <button class="budget-preset active" data-amount="1500">1500</button>
+                                <button class="budget-preset" data-amount="2000">2000</button>
+                                <button class="budget-preset" data-amount="2500">2500</button>
+                                <button class="budget-preset" data-amount="3000">3000</button>
+                            </div>
+                            <button class="btn btn-primary btn-block" id="btn-suggest">
+                                <i class="fas fa-magic"></i> Suggérer un repas
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="budget-result-panel" id="budget-result-panel">
+                        <div class="budget-result-placeholder">
+                            <div class="placeholder-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h3>Entrez votre budget</h3>
+                            <p>Nous trouverons la meilleure combinaison pour vous</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== NUTRITION SECTION ==================== -->
+        <section id="nutrition" class="section section-nutrition">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-badge"><i class="fas fa-apple-whole"></i> Suivi Nutrition</div>
+                    <h2 class="section-title">Suivez votre <span class="gradient-text">alimentation</span></h2>
+                    <p class="section-subtitle">Un résumé simple de votre consommation quotidienne</p>
+                </div>
+
+                <div class="nutrition-dashboard">
+                    <div class="nutrition-cards">
+                        <div class="nutrition-card calories-card">
+                            <div class="nutrition-card-icon">
+                                <i class="fas fa-fire-flame-curved"></i>
+                            </div>
+                            <div class="nutrition-card-content">
+                                <span class="nutrition-label">Calories</span>
+                                <span class="nutrition-value" id="nut-calories">820</span>
+                                <span class="nutrition-unit">kcal</span>
+                            </div>
+                            <div class="nutrition-progress">
+                                <div class="progress-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="progress-bg"></circle>
+                                        <circle cx="60" cy="60" r="52" class="progress-fill calories-fill"
+                                            style="stroke-dashoffset: 120;"></circle>
+                                    </svg>
+                                    <span class="progress-percent">41%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nutrition-card protein-card">
+                            <div class="nutrition-card-icon">
+                                <i class="fas fa-dumbbell"></i>
+                            </div>
+                            <div class="nutrition-card-content">
+                                <span class="nutrition-label">Protéines</span>
+                                <span class="nutrition-value" id="nut-proteins">35</span>
+                                <span class="nutrition-unit">g</span>
+                            </div>
+                            <div class="nutrition-progress">
+                                <div class="progress-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="progress-bg"></circle>
+                                        <circle cx="60" cy="60" r="52" class="progress-fill protein-fill"
+                                            style="stroke-dashoffset: 180;"></circle>
+                                    </svg>
+                                    <span class="progress-percent">58%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nutrition-card carbs-card">
+                            <div class="nutrition-card-icon">
+                                <i class="fas fa-wheat-awn"></i>
+                            </div>
+                            <div class="nutrition-card-content">
+                                <span class="nutrition-label">Glucides</span>
+                                <span class="nutrition-value" id="nut-carbs">110</span>
+                                <span class="nutrition-unit">g</span>
+                            </div>
+                            <div class="nutrition-progress">
+                                <div class="progress-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="progress-bg"></circle>
+                                        <circle cx="60" cy="60" r="52" class="progress-fill carbs-fill"
+                                            style="stroke-dashoffset: 200;"></circle>
+                                    </svg>
+                                    <span class="progress-percent">34%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nutrition-card spending-card">
+                            <div class="nutrition-card-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="nutrition-card-content">
+                                <span class="nutrition-label">Dépenses</span>
+                                <span class="nutrition-value" id="nut-spending">1500</span>
+                                <span class="nutrition-unit">FCFA</span>
+                            </div>
+                            <div class="nutrition-progress">
+                                <div class="progress-ring">
+                                    <svg viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="52" class="progress-bg"></circle>
+                                        <circle cx="60" cy="60" r="52" class="progress-fill spending-fill"
+                                            style="stroke-dashoffset: 160;"></circle>
+                                    </svg>
+                                    <span class="progress-percent">50%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nutrition-weekly">
+                        <h3><i class="fas fa-chart-line"></i> Résumé de la semaine</h3>
+                        <div class="weekly-chart" id="weekly-chart">
+                            <div class="weekly-bar" data-day="Lun">
+                                <div class="bar-fill" style="height: 65%;"></div>
+                                <span class="bar-label">Lun</span>
+                            </div>
+                            <div class="weekly-bar" data-day="Mar">
+                                <div class="bar-fill" style="height: 80%;"></div>
+                                <span class="bar-label">Mar</span>
+                            </div>
+                            <div class="weekly-bar" data-day="Mer">
+                                <div class="bar-fill" style="height: 55%;"></div>
+                                <span class="bar-label">Mer</span>
+                            </div>
+                            <div class="weekly-bar" data-day="Jeu">
+                                <div class="bar-fill" style="height: 70%;"></div>
+                                <span class="bar-label">Jeu</span>
+                            </div>
+                            <div class="weekly-bar today" data-day="Ven">
+                                <div class="bar-fill" style="height: 41%;"></div>
+                                <span class="bar-label">Ven</span>
+                            </div>
+                            <div class="weekly-bar" data-day="Sam">
+                                <div class="bar-fill" style="height: 0%;"></div>
+                                <span class="bar-label">Sam</span>
+                            </div>
+                            <div class="weekly-bar" data-day="Dim">
+                                <div class="bar-fill" style="height: 0%;"></div>
+                                <span class="bar-label">Dim</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== REWARDS SECTION ==================== -->
+        <section id="rewards" class="section section-rewards">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-badge"><i class="fas fa-crown"></i> Récompenses</div>
+                    <h2 class="section-title">Points & <span class="gradient-text">Récompenses</span></h2>
+                    <p class="section-subtitle">Chaque commande > 1500 FCFA = 1 point • 20 points = repas gratuit!</p>
+                </div>
+
+                <div class="rewards-dashboard">
+                    <div class="rewards-user-card glass-card">
+                        <div class="rewards-avatar">
+                            <div class="avatar-circle">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="avatar-badge">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <h3 class="rewards-username">Ange Kouadio</h3>
+                        <div class="rewards-points-display">
+                            <div class="points-number" id="user-points">15</div>
+                            <div class="points-label">points</div>
+                        </div>
+                        <div class="rewards-progress-bar">
+                            <div class="progress-track">
+                                <div class="progress-fill-bar" style="width: 75%;"></div>
+                            </div>
+                            <div class="progress-labels">
+                                <span>15 pts</span>
+                                <span>20 pts = 🎁 Repas gratuit</span>
+                            </div>
+                        </div>
+                        <p class="rewards-message">Plus que <strong>5 commandes</strong> pour un repas gratuit!</p>
+                    </div>
+
+                    <div class="rewards-perks">
+                        <h3><i class="fas fa-gift"></i> Récompenses disponibles</h3>
+                        <div class="perks-grid">
+                            <div class="perk-card">
+                                <div class="perk-icon">🍽️</div>
+                                <div class="perk-info">
+                                    <h4>Repas Gratuit</h4>
+                                    <p>Menu du jour offert</p>
+                                </div>
+                                <div class="perk-cost">20 pts</div>
+                            </div>
+                            <div class="perk-card">
+                                <div class="perk-icon">🥤</div>
+                                <div class="perk-info">
+                                    <h4>Boisson Gratuite</h4>
+                                    <p>Jus ou soda au choix</p>
+                                </div>
+                                <div class="perk-cost">10 pts</div>
+                            </div>
+                            <div class="perk-card">
+                                <div class="perk-icon">🍰</div>
+                                <div class="perk-info">
+                                    <h4>Dessert Offert</h4>
+                                    <p>Dessert du jour</p>
+                                </div>
+                                <div class="perk-cost">8 pts</div>
+                            </div>
+                            <div class="perk-card locked">
+                                <div class="perk-icon">👑</div>
+                                <div class="perk-info">
+                                    <h4>Statut VIP</h4>
+                                    <p>File prioritaire + 2x points</p>
+                                </div>
+                                <div class="perk-cost">50 pts</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="leaderboard glass-card">
+                        <h3><i class="fas fa-ranking-star"></i> Top Utilisateurs</h3>
+                        <div class="leaderboard-list" id="leaderboard-list">
+                            <div class="leaderboard-item rank-1">
+                                <div class="leader-rank">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="leader-avatar"
+                                    style="background: linear-gradient(135deg, #FFD700, #FFA500);">A</div>
+                                <div class="leader-info">
+                                    <strong>Ange</strong>
+                                    <span>Champion de la cantine</span>
+                                </div>
+                                <div class="leader-points">120 pts</div>
+                            </div>
+                            <div class="leaderboard-item rank-2">
+                                <div class="leader-rank">
+                                    <i class="fas fa-medal"></i>
+                                </div>
+                                <div class="leader-avatar"
+                                    style="background: linear-gradient(135deg, #C0C0C0, #A0A0A0);">K</div>
+                                <div class="leader-info">
+                                    <strong>Kevin</strong>
+                                    <span>Habitué fidèle</span>
+                                </div>
+                                <div class="leader-points">95 pts</div>
+                            </div>
+                            <div class="leaderboard-item rank-3">
+                                <div class="leader-rank">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <div class="leader-avatar"
+                                    style="background: linear-gradient(135deg, #CD7F32, #B8860B);">S</div>
+                                <div class="leader-info">
+                                    <strong>Sarah</strong>
+                                    <span>Gastronome appréciée</span>
+                                </div>
+                                <div class="leader-points">80 pts</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leader-rank">4</div>
+                                <div class="leader-avatar"
+                                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">M</div>
+                                <div class="leader-info">
+                                    <strong>Marie</strong>
+                                    <span>En progression</span>
+                                </div>
+                                <div class="leader-points">72 pts</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leader-rank">5</div>
+                                <div class="leader-avatar"
+                                    style="background: linear-gradient(135deg, #ec4899, #f43f5e);">P</div>
+                                <div class="leader-info">
+                                    <strong>Paul</strong>
+                                    <span>Nouveau talent</span>
+                                </div>
+                                <div class="leader-points">65 pts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ANTI-GASPILLAGE SECTION ==================== -->
+        <section id="deals" class="section section-deals">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-badge"><i class="fas fa-recycle"></i> Anti-Gaspillage</div>
+                    <h2 class="section-title">Réductions <span class="gradient-text">Anti-Gaspi</span></h2>
+                    <p class="section-subtitle">Des plats à prix réduit pour éviter le gaspillage alimentaire ♻️</p>
+                </div>
+
+                <div class="deals-timer">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span>Offres disponibles encore <strong id="deals-countdown">2h 30min</strong></span>
+                </div>
+
+                <div class="deals-grid" id="deals-grid">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="deals-impact glass-card">
+                    <h3><i class="fas fa-leaf"></i> Impact Environnemental</h3>
+                    <div class="impact-stats">
+                        <div class="impact-stat">
+                            <div class="impact-number">156</div>
+                            <div class="impact-label">Repas sauvés ce mois</div>
+                        </div>
+                        <div class="impact-stat">
+                            <div class="impact-number">78 kg</div>
+                            <div class="impact-label">CO₂ économisé</div>
+                        </div>
+                        <div class="impact-stat">
+                            <div class="impact-number">45</div>
+                            <div class="impact-label">Étudiants participants</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MARKETPLACE SECTION ==================== -->
+        <section id="marketplace" class="section section-marketplace">
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-badge"><i class="fas fa-rocket"></i> Espace Business</div>
+                    <h2 class="section-title">Business <span class="gradient-text">Étudiants</span></h2>
+                    <p class="section-subtitle">Découvrez les produits de nos entrepreneurs étudiants 🎓</p>
+                </div>
+
+                <div class="marketplace-grid" id="marketplace-grid">
+                    <!-- Populated by JS -->
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Order Success Modal -->
+    <div class="modal-overlay" id="order-modal">
+        <div class="modal-content">
+            <div class="modal-success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Commande confirmée! 🎉</h2>
+            <p>Votre plat sera prêt avec une étiquette à votre nom.</p>
+            <div class="modal-order-details" id="modal-order-details"></div>
+            <div class="modal-eta">
+                <i class="fas fa-clock"></i>
+                <span>Estimé prêt dans <strong>12 minutes</strong></span>
+            </div>
+            <button class="btn btn-primary" onclick="closeModal()">
+                <i class="fas fa-thumbs-up"></i> Super, merci!
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notification-panel">
+        <div class="notif-header">
+            <h3><i class="fas fa-bell"></i> Notifications</h3>
+            <button class="btn-close-notif" id="close-notif"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="notif-list" id="notif-list">
+            <!-- Populated dynamically by JS from admin notifications -->
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon"><i class="fas fa-check"></i></div>
+        <div class="toast-message" id="toast-message">Action effectuée!</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

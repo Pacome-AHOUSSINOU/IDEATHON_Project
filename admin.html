@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Campus Canteen - Panneau d'administration">
+    <title>SmartCanteen — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <!-- ADMIN LOGIN OVERLAY -->
+    <div class="admin-login-overlay" id="admin-login-overlay">
+        <div class="bg-animated">
+            <div class="bg-orb bg-orb-1"></div>
+            <div class="bg-orb bg-orb-2"></div>
+            <div class="bg-orb bg-orb-3"></div>
+        </div>
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="login-logo-icon"><i class="fas fa-shield-halved"></i></div>
+                    <h1>Admin Panel</h1>
+                    <p>Connectez-vous pour gérer la cantine</p>
+                </div>
+                <form id="admin-login-form">
+                    <div class="login-field">
+                        <label for="admin-username"><i class="fas fa-user-shield"></i> Identifiant</label>
+                        <input type="text" id="admin-username" placeholder="admin" required>
+                    </div>
+                    <div class="login-field">
+                        <label for="admin-password"><i class="fas fa-lock"></i> Mot de passe</label>
+                        <input type="password" id="admin-password" placeholder="Mot de passe" required>
+                    </div>
+                    <div class="login-error" id="login-error" style="display:none;">
+                        <i class="fas fa-exclamation-triangle"></i> Identifiants incorrects
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+                <div class="login-footer">
+                    <span>Mot de passe par défaut: <strong>admin123</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div class="admin-app" id="admin-app" style="display:none;">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon"><i class="fas fa-shield-halved"></i></div>
+                    <div>
+                        <span class="logo-text">SmartCanteen</span>
+                        <span class="sidebar-role">Administration</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" data-panel="dashboard" id="nav-dashboard">
+                    <i class="fas fa-chart-pie"></i> Tableau de bord
+                </a>
+                <a href="#" class="sidebar-link" data-panel="canteen" id="nav-canteen">
+                    <i class="fas fa-store"></i> Ma Cantine
+                </a>
+                <a href="#" class="sidebar-link" data-panel="menu-mgmt" id="nav-menu">
+                    <i class="fas fa-utensils"></i> Gestion du Menu
+                </a>
+                <a href="#" class="sidebar-link" data-panel="orders" id="nav-orders">
+                    <i class="fas fa-receipt"></i> Commandes
+                </a>
+                <a href="#" class="sidebar-link" data-panel="businesses" id="nav-businesses">
+                    <i class="fas fa-briefcase"></i> Business Étudiants
+                </a>
+                <a href="#" class="sidebar-link" data-panel="notifications" id="nav-notifications">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" id="admin-theme-toggle" title="Changer le thème">
+                    <i class="fas fa-moon" id="admin-theme-icon"></i>
+                </button>
+                <button class="btn-admin-logout" id="btn-admin-logout">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </aside>
+
+        <!-- Admin Main Content -->
+        <div class="admin-main">
+            <header class="admin-header">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 id="admin-page-title">Tableau de bord</h2>
+                <div class="admin-header-right">
+                    <span class="admin-canteen-name" id="header-canteen-name">—</span>
+                    <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+                </div>
+            </header>
+
+            <!-- DASHBOARD PANEL -->
+            <div class="admin-panel active" id="panel-dashboard">
+                <div class="dashboard-stats">
+                    <div class="stat-card stat-orders">
+                        <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="stat-orders">0</span>
+                            <span class="stat-label">Commandes</span>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-revenue">
+                        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="stat-revenue">0</span>
+                            <span class="stat-label">Revenus (FCFA)</span>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-users">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="stat-users">0</span>
+                            <span class="stat-label">Étudiants actifs</span>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-menu">
+                        <div class="stat-icon"><i class="fas fa-bowl-food"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="stat-menu-count">0</span>
+                            <span class="stat-label">Plats au menu</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-recent glass-card">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Commandes récentes</h3>
+                    <div class="recent-orders" id="recent-orders">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANTEEN SETTINGS PANEL -->
+            <div class="admin-panel" id="panel-canteen">
+                <div class="panel-card glass-card">
+                    <h3><i class="fas fa-store"></i> Paramètres de la Cantine</h3>
+                    <p class="panel-desc">Configurez les informations de votre cantine. Ce nom sera affiché aux
+                        étudiants sur leur page.</p>
+                    <div class="form-group">
+                        <label for="canteen-name-input"><i class="fas fa-signature"></i> Nom de la cantine</label>
+                        <input type="text" id="canteen-name-input" placeholder="Ex: Cantine du Campus Universitaire"
+                            class="admin-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="canteen-hours"><i class="fas fa-clock"></i> Heures d'ouverture</label>
+                        <input type="text" id="canteen-hours" placeholder="Ex: 11h00 - 15h00" class="admin-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="canteen-location"><i class="fas fa-map-marker-alt"></i> Emplacement</label>
+                        <input type="text" id="canteen-location" placeholder="Ex: Bâtiment A, Rez-de-chaussée"
+                            class="admin-input">
+                    </div>
+                    <button class="btn btn-primary" id="btn-save-canteen">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                </div>
+            </div>
+
+            <!-- MENU MANAGEMENT PANEL -->
+            <div class="admin-panel" id="panel-menu-mgmt">
+                <div class="menu-mgmt-header">
+                    <h3><i class="fas fa-utensils"></i> Menu actuel</h3>
+                    <button class="btn btn-primary" id="btn-add-item">
+                        <i class="fas fa-plus"></i> Ajouter un plat
+                    </button>
+                </div>
+                <div class="menu-mgmt-list" id="menu-mgmt-list"></div>
+
+                <!-- Add/Edit Item Modal -->
+                <div class="admin-modal-overlay" id="item-modal" style="display:none;">
+                    <div class="admin-modal">
+                        <div class="admin-modal-header">
+                            <h3 id="item-modal-title"><i class="fas fa-plus-circle"></i> Ajouter un plat</h3>
+                            <button class="btn-close-modal" id="btn-close-item-modal"><i
+                                    class="fas fa-times"></i></button>
+                        </div>
+                        <form id="item-form">
+                            <input type="hidden" id="item-edit-id">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nom du plat</label>
+                                    <input type="text" id="item-name" class="admin-input" required
+                                        placeholder="Ex: Riz au Poulet">
+                                </div>
+                                <div class="form-group">
+                                    <label>Emoji</label>
+                                    <input type="text" id="item-emoji" class="admin-input" required placeholder="🍛">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" id="item-desc" class="admin-input" required
+                                    placeholder="Description courte du plat">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Prix (FCFA)</label>
+                                    <input type="number" id="item-price" class="admin-input" required min="50"
+                                        placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Calories (kcal)</label>
+                                    <input type="number" id="item-calories" class="admin-input" required min="0"
+                                        placeholder="500">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Protéines (g)</label>
+                                    <input type="number" id="item-protein" class="admin-input" required min="0"
+                                        placeholder="25">
+                                </div>
+                                <div class="form-group">
+                                    <label>Glucides (g)</label>
+                                    <input type="number" id="item-carbs" class="admin-input" required min="0"
+                                        placeholder="60">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Catégorie</label>
+                                <select id="item-category" class="admin-input">
+                                    <option value="plat">Plat principal</option>
+                                    <option value="accompagnement">Accompagnement</option>
+                                    <option value="boisson">Boisson</option>
+                                    <option value="dessert">Dessert</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Sauvegarder
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ORDERS PANEL (dynamic from localStorage) -->
+            <div class="admin-panel" id="panel-orders">
+                <div class="panel-card glass-card">
+                    <h3><i class="fas fa-receipt"></i> Toutes les commandes</h3>
+                    <p class="panel-desc">Les commandes des étudiants apparaissent ici en temps réel. Marquez-les comme
+                        "Prêt" puis "Payé".</p>
+                    <div class="orders-list" id="admin-orders-list">
+                        <!-- Populated by JS in real-time -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- STUDENT BUSINESS PANEL -->
+            <div class="admin-panel" id="panel-businesses">
+                <div class="menu-mgmt-header">
+                    <h3><i class="fas fa-briefcase"></i> Business Étudiants</h3>
+                    <button class="btn btn-primary" id="btn-add-business">
+                        <i class="fas fa-plus"></i> Ajouter un business
+                    </button>
+                </div>
+                <p class="panel-desc">Gérez les business étudiants qui apparaissent sur la page client dans "Espace
+                    Business".</p>
+                <div class="menu-mgmt-list" id="business-list"></div>
+
+                <!-- Add/Edit Business Modal -->
+                <div class="admin-modal-overlay" id="biz-modal" style="display:none;">
+                    <div class="admin-modal">
+                        <div class="admin-modal-header">
+                            <h3 id="biz-modal-title"><i class="fas fa-plus-circle"></i> Ajouter un business</h3>
+                            <button class="btn-close-modal" id="btn-close-biz-modal"><i
+                                    class="fas fa-times"></i></button>
+                        </div>
+                        <form id="biz-form">
+                            <input type="hidden" id="biz-edit-id">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label><i class="fas fa-user"></i> Nom de l'étudiant</label>
+                                    <input type="text" id="biz-student-name" class="admin-input" required
+                                        placeholder="Ex: Sarah Koné">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-store"></i> Nom du business</label>
+                                    <input type="text" id="biz-name" class="admin-input" required
+                                        placeholder="Ex: Crêpes Maison">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label><i class="fas fa-box"></i> Produit vendu</label>
+                                    <input type="text" id="biz-product" class="admin-input" required
+                                        placeholder="Ex: Crêpes sucrées">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-smile"></i> Emoji</label>
+                                    <input type="text" id="biz-emoji" class="admin-input" placeholder="🥞">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label><i class="fas fa-tag"></i> Prix (FCFA)</label>
+                                    <input type="number" id="biz-price" class="admin-input" required min="50"
+                                        placeholder="500">
+                                </div>
+                                <div class="form-group">
+                                    <label><i class="fas fa-gift"></i> Promo</label>
+                                    <input type="text" id="biz-promo" class="admin-input"
+                                        placeholder="Ex: 2 pour 800 FCFA">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-map-marker-alt"></i> Emplacement</label>
+                                <input type="text" id="biz-location" class="admin-input" required
+                                    placeholder="Ex: Bâtiment B, Hall d'entrée">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Sauvegarder
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTIFICATIONS PANEL -->
+            <div class="admin-panel" id="panel-notifications">
+                <div class="panel-card glass-card">
+                    <h3><i class="fas fa-bell"></i> Envoyer une notification</h3>
+                    <p class="panel-desc">Envoyez des notifications aux étudiants — tout le monde ou un individu
+                        spécifique. Ils les verront instantanément.</p>
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Destinataire</label>
+                        <select id="notif-target" class="admin-input">
+                            <option value="all">Tous les étudiants</option>
+                            <option value="individual">Étudiant spécifique</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="notif-individual-group" style="display:none;">
+                        <label><i class="fas fa-user"></i> Nom de l'étudiant</label>
+                        <input type="text" id="notif-student-name" class="admin-input" placeholder="Ex: Ange Kouadio">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-heading"></i> Titre</label>
+                        <input type="text" id="notif-title" class="admin-input" placeholder="Ex: Promo spéciale!">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-message"></i> Message</label>
+                        <textarea id="notif-message" class="admin-input admin-textarea"
+                            placeholder="Votre message ici..." rows="4"></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="btn-send-notif">
+                        <i class="fas fa-paper-plane"></i> Envoyer la notification
+                    </button>
+                </div>
+
+                <div class="panel-card glass-card" style="margin-top:24px;">
+                    <h3><i class="fas fa-history"></i> Historique des notifications</h3>
+                    <div class="notif-history" id="notif-history"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-icon"><i class="fas fa-check"></i></div>
+        <div class="toast-message" id="toast-message">Action effectuée!</div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

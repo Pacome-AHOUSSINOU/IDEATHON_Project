@@ -1,10 +1,10 @@
 /* ===== ROOT & VARIABLES ===== */
 :root {
-    --primary: #f59e0b;
-    --primary-light: #fbbf24;
-    --primary-dark: #d97706;
-    --accent: #10b981;
-    --accent-light: #34d399;
+    --primary: #2563eb;
+    --primary-light: #60a5fa;
+    --primary-dark: #1e3a8a;
+    --accent: #f59e0b;
+    --accent-light: #fbbf24;
     --success: #10b981;
     --danger: #ef4444;
     --warning: #f97316;
@@ -16,7 +16,7 @@
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
-    --gradient-1: linear-gradient(135deg, #f59e0b, #fbbf24, #f97316);
+    --gradient-1: linear-gradient(135deg, #1e3a8a, #2563eb, #3b82f6);
     --gradient-2: linear-gradient(135deg, #10b981, #06b6d4);
     --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
     --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -68,7 +68,7 @@ body {
 .bg-orb-1 {
     width: 600px;
     height: 600px;
-    background: #f59e0b;
+    background: #1e3a8a;
     top: -200px;
     left: -200px;
 }
@@ -76,7 +76,7 @@ body {
 .bg-orb-2 {
     width: 500px;
     height: 500px;
-    background: #ec4899;
+    background: #2563eb;
     bottom: -150px;
     right: -150px;
     animation-delay: -7s;

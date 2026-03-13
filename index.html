@@ -368,20 +368,27 @@
         <section id="history" class="section section-history">
             <div class="section-container">
                 <div class="section-header">
-                    <div class="section-badge"><i class="fas fa-star"></i> Vos Avis</div>
+                    <div class="section-badge"><i class="fas fa-list-check"></i> Suivi Commandes</div>
                     <h2 class="section-title">Historique des <span class="gradient-text">Commandes</span></h2>
-                    <p class="section-subtitle">Retrouvez vos plats passés et notez-les pour aider la cantine à
-                        s'améliorer</p>
+                    <p class="section-subtitle">Suivez vos commandes en cours et retrouvez votre historique</p>
                 </div>
 
-                <div class="history-list" id="history-list"
-                    style="display:flex; flex-direction:column; gap:15px; margin-top:30px;">
-                    <!-- Populated by JS -->
-                    <div
-                        style="text-align:center; padding:40px; color:var(--text-muted); background:var(--glass); border-radius:var(--radius); border:1px solid var(--glass-border);">
-                        Connectez-vous pour voir votre historique ou passez une commande!
-                    </div>
+                <!-- History Tab Navigation -->
+                <div class="history-tabs-nav" id="history-tabs-nav">
+                    <button class="history-tab active" data-tab="active" onclick="switchHistoryTab('active')">
+                        <i class="fas fa-hourglass-half"></i> En cours
+                        <span class="history-tab-badge" id="badge-active">0</span>
+                    </button>
+                    <button class="history-tab" data-tab="done" onclick="switchHistoryTab('done')">
+                        <i class="fas fa-check-double"></i> Terminées
+                        <span class="history-tab-badge" id="badge-done">0</span>
+                    </button>
+                    <button class="history-tab" data-tab="cancelled" onclick="switchHistoryTab('cancelled')">
+                        <i class="fas fa-ban"></i> Annulées
+                        <span class="history-tab-badge" id="badge-cancelled">0</span>
+                    </button>
                 </div>
+                <div id="history-list" class="history-panels"></div>
             </div>
         </section>
 
@@ -836,6 +843,35 @@
         <div class="notif-list" id="notif-list">
             <!-- Populated dynamically by JS from admin notifications -->
         </div>
+    </div>
+
+    <!-- Cart Add Confirmation Popup -->
+    <div class="cart-confirm" id="cart-confirm" role="status" aria-live="polite">
+        <div class="cart-confirm-header">
+            <div class="cart-confirm-icon-wrap">
+                <i class="fas fa-check"></i>
+            </div>
+            <span class="cart-confirm-label">Article ajouté au panier</span>
+            <button class="cart-confirm-close" onclick="closeCartConfirm()" aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-confirm-item">
+            <span class="cart-confirm-emoji" id="cart-confirm-emoji"></span>
+            <div class="cart-confirm-details">
+                <span class="cart-confirm-name" id="cart-confirm-name"></span>
+                <span class="cart-confirm-meta" id="cart-confirm-meta"></span>
+            </div>
+        </div>
+        <div class="cart-confirm-actions">
+            <button class="btn btn-glass cart-confirm-btn" onclick="closeCartConfirm()">
+                <i class="fas fa-arrow-left"></i> Continuer
+            </button>
+            <button class="btn btn-primary cart-confirm-btn" onclick="goToCart()">
+                <i class="fas fa-shopping-cart"></i> Voir le panier
+            </button>
+        </div>
+        <div class="cart-confirm-bar"></div>
     </div>
 
     <!-- Toast Notification -->

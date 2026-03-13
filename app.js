@@ -100,6 +100,7 @@ function pollForUpdates() {
     syncCanteenName();
     loadClientNotifications();
     checkOrderStatusChanges();
+    renderHistory(); // keep history in sync with admin status changes
 }
 
 // ===== CANTEEN NAME SYNC =====
@@ -504,7 +505,8 @@ function processPayment() {
 
 function addToCartFromMenu(id) {
     updateCart(id, 1);
-    showToast('Ajouté au panier!');
+    const item = menuData.find(m => m.id === id);
+    if (item) showCartConfirm(item);
 }
 
 function updateCart(id, delta) {
@@ -584,7 +586,7 @@ function placeOrder(isPaid = false) {
         items: itemsList,
         itemsDetail: cart.map(c => ({ emoji: c.emoji, name: c.name, qty: c.qty, price: c.price })),
         total: total,
-        status: isPaid ? 'paid' : 'pending', // pending → ready → paid
+        status: 'pending', // always starts pending → ready → paid (confirmed by user)
         paid: isPaid,
         orderDate: orderDateVal,
         orderDateText: orderDateText,
@@ -594,7 +596,7 @@ function placeOrder(isPaid = false) {
     localStorage.setItem('canteen_orders', JSON.stringify(orders));
 
     // Track this order's status
-    lastOrderStatuses[newOrder.id] = isPaid ? 'paid' : 'pending';
+    lastOrderStatuses[newOrder.id] = 'pending';
 
     const modalDetails = document.getElementById('modal-order-details');
     modalDetails.innerHTML = `
@@ -628,66 +630,306 @@ function closeModal() {
     document.getElementById('order-modal').classList.remove('active');
 }
 
-// ===== HISTORY & RATING SYSTEM =====
+// ===== HISTORY — ETA ENGINE =====
+let _etaInterval = null;
+// Track which orders have already triggered the "ready" notification this session
+let _notifiedOrders = new Set();
+
+// Compute ETA from the order id (which is Date.now() at placement).
+// Returns { text, progress, late } for 'today' orders, or null for pre-orders.
+function computeETA(orderId, orderDate) {
+    if (orderDate && orderDate !== 'today') return null;
+    const ETA_MS = 12 * 60 * 1000; // 12 minutes
+    const elapsed = Date.now() - orderId;
+    const progress = Math.min(100, (elapsed / ETA_MS) * 100);
+    const remaining = ETA_MS - elapsed;
+    if (remaining <= 0) return { late: true, text: 'En attente de confirmation', progress: 100 };
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    return { late: false, text: `${mins}m ${secs.toString().padStart(2, '0')}s`, progress };
+}
+
+// Tick: updates only ETA text + bar width every second — no full re-render.
+function _tickETA() {
+    document.querySelectorAll('[data-eta-order-id]').forEach(el => {
+        const orderId = parseInt(el.dataset.etaOrderId);
+        const eta = computeETA(orderId, el.dataset.etaDate);
+        if (!eta) return;
+        const remaining = el.querySelector('.eta-remaining');
+        const barFill = el.querySelector('.eta-bar-fill');
+        if (remaining) {
+            remaining.textContent = eta.text;
+            remaining.style.color = eta.late ? 'var(--warning)' : 'var(--success)';
+        }
+        if (barFill) {
+            barFill.style.width = eta.progress + '%';
+            barFill.style.background = eta.late
+                ? 'linear-gradient(90deg, var(--warning), var(--primary))'
+                : 'linear-gradient(90deg, var(--success), var(--accent-light))';
+        }
+        // Trigger notification the first time this order goes late
+        if (eta.late && !_notifiedOrders.has(orderId)) {
+            _notifiedOrders.add(orderId);
+            showOrderReadyNotif(orderId);
+        }
+    });
+}
+
+function _startETA() {
+    clearInterval(_etaInterval);
+    _etaInterval = setInterval(_tickETA, 1000);
+}
+
+// ===== ORDER READY NOTIFICATION =====
+function showOrderReadyNotif(orderId) {
+    const orders = JSON.parse(localStorage.getItem('canteen_orders') || '[]');
+    const order = orders.find(o => o.id === orderId);
+    if (!order || order.status !== 'pending') return; // don't show if already confirmed/cancelled
+
+    // Remove any existing notif
+    const existing = document.getElementById('order-ready-notif');
+    if (existing) existing.remove();
+
+    const notif = document.createElement('div');
+    notif.id = 'order-ready-notif';
+    notif.className = 'order-ready-notif';
+    notif.innerHTML = `
+        <div class="order-ready-notif-inner">
+            <div class="order-ready-icon"><i class="fas fa-bell"></i></div>
+            <div class="order-ready-content">
+                <div class="order-ready-title">Votre commande est prête !</div>
+                <div class="order-ready-sub">#${String(orderId).slice(-6)} · ${order.total} FCFA</div>
+                <div class="order-ready-items">${_itemsText(order)}</div>
+            </div>
+            <div class="order-ready-actions">
+                <button class="btn-confirm-receipt" onclick="confirmOrderReceived(${orderId})">
+                    <i class="fas fa-check"></i> Confirmer la réception
+                </button>
+                <button class="btn-dismiss-notif" onclick="dismissOrderReadyNotif()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>`;
+    document.body.appendChild(notif);
+
+    // Animate in
+    requestAnimationFrame(() => notif.classList.add('visible'));
+}
+
+function dismissOrderReadyNotif() {
+    const notif = document.getElementById('order-ready-notif');
+    if (!notif) return;
+    notif.classList.remove('visible');
+    setTimeout(() => notif.remove(), 400);
+}
+
+function confirmOrderReceived(orderId) {
+    const orders = JSON.parse(localStorage.getItem('canteen_orders') || '[]');
+    const idx = orders.findIndex(o => o.id === orderId);
+    if (idx !== -1) {
+        orders[idx].status = 'paid';
+        localStorage.setItem('canteen_orders', JSON.stringify(orders));
+    }
+    dismissOrderReadyNotif();
+    showToast('✅ Commande récupérée ! Bon appétit 🍽️');
+    renderHistory();
+    // Switch to "Terminées" tab so user sees their confirmed order
+    switchHistoryTab('done');
+}
+
+// ===== HISTORY — TABS =====
+function switchHistoryTab(tab) {
+    document.querySelectorAll('.history-tab').forEach(t =>
+        t.classList.toggle('active', t.dataset.tab === tab)
+    );
+    document.querySelectorAll('.history-panel').forEach(p =>
+        p.classList.toggle('active', p.id === 'panel-' + tab)
+    );
+    // Start ETA ticker only when the active-orders tab is visible
+    if (tab === 'active') {
+        _startETA();
+    } else {
+        clearInterval(_etaInterval);
+    }
+}
+
+// ===== HISTORY — CANCEL =====
+function cancelOrder(orderId) {
+    if (!confirm('Annuler cette commande ?')) return;
+    const orders = JSON.parse(localStorage.getItem('canteen_orders') || '[]');
+    const idx = orders.findIndex(o => o.id === orderId);
+    if (idx !== -1 && orders[idx].status === 'pending') {
+        orders[idx].status = 'cancelled';
+        localStorage.setItem('canteen_orders', JSON.stringify(orders));
+        showToast('Commande annulée');
+        renderHistory();
+    }
+}
+
+// ===== HISTORY — CARD BUILDERS =====
+function _itemsText(order) {
+    return (order.itemsDetail || []).map(i => `${i.emoji} ${i.name} ×${i.qty}`).join(' · ');
+}
+
+function _renderActiveCard(order) {
+    const isReady = order.status === 'ready';
+    const isPreOrder = order.orderDate && order.orderDate !== 'today';
+
+    const statusBadge = isReady
+        ? `<span class="history-status-badge status-ready"><i class="fas fa-bell"></i> Prêt à récupérer</span>`
+        : `<span class="history-status-badge status-pending"><i class="fas fa-hourglass-half"></i> En préparation</span>`;
+
+    const eta = (!isReady && !isPreOrder) ? computeETA(order.id, order.orderDate) : null;
+    const isLate = eta && eta.late;
+
+    let etaBlock;
+    if (isReady) {
+        etaBlock = `<div class="eta-ready-note"><i class="fas fa-check-circle"></i> Votre commande est prête! Venez la récupérer au comptoir.</div>`;
+    } else if (isPreOrder) {
+        etaBlock = `<div class="eta-pre-order"><i class="fas fa-calendar-check"></i> Programmée pour <strong>${order.orderDateText || order.orderDate}</strong></div>`;
+    } else {
+        const initialText = eta ? eta.text : '12m 00s';
+        const initialPct = eta ? eta.progress : 0;
+        etaBlock = `
+            <div class="eta-block" data-eta-order-id="${order.id}" data-eta-date="${order.orderDate || 'today'}">
+                <div class="eta-header">
+                    <span class="eta-label"><i class="fas fa-fire-flame-curved"></i> Temps restant estimé</span>
+                    <span class="eta-remaining">${initialText}</span>
+                </div>
+                <div class="eta-bar">
+                    <div class="eta-bar-fill" style="width:${initialPct}%"></div>
+                </div>
+            </div>`;
+    }
+
+    const cancelBtn = !isReady && !isLate
+        ? `<button class="btn-cancel-order" onclick="cancelOrder(${order.id})"><i class="fas fa-times"></i> Annuler</button>`
+        : '';
+    const confirmBtn = isLate
+        ? `<button class="btn-confirm-receipt" onclick="confirmOrderReceived(${order.id})"><i class="fas fa-check"></i> Confirmer la réception</button>`
+        : '';
+
+    return `
+        <div class="history-card">
+            <div class="history-card-top">
+                <div>
+                    <div class="history-card-id"><i class="fas fa-receipt" style="opacity:.5; margin-right:6px;"></i>Commande #${String(order.id).slice(-6)}</div>
+                    <div class="history-card-time"><i class="fas fa-clock"></i>${order.time}</div>
+                </div>
+                ${statusBadge}
+            </div>
+            <div class="history-items">${_itemsText(order)}</div>
+            ${etaBlock}
+            <div class="history-card-footer">
+                <span class="history-total">${order.total} FCFA</span>
+                ${cancelBtn}${confirmBtn}
+            </div>
+        </div>`;
+}
+
+function _renderDoneCard(order, reviews) {
+    const rating = reviews[order.id] || 0;
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        const filled = i <= rating;
+        stars += `<i class="fas fa-star" style="color:${filled ? 'var(--warning)' : 'rgba(255,255,255,0.15)'}; cursor:${rating === 0 ? 'pointer' : 'default'};" ${rating === 0 ? `onclick="rateOrder(${order.id},${i})"` : ''}></i>`;
+    }
+    return `
+        <div class="history-card">
+            <div class="history-card-top">
+                <div>
+                    <div class="history-card-id"><i class="fas fa-receipt" style="opacity:.5; margin-right:6px;"></i>Commande #${String(order.id).slice(-6)}</div>
+                    <div class="history-card-time"><i class="fas fa-calendar"></i>${order.time}</div>
+                </div>
+                <span class="history-status-badge status-paid"><i class="fas fa-check-double"></i> Récupérée</span>
+            </div>
+            <div class="history-items">${_itemsText(order)}</div>
+            <div class="history-card-footer">
+                <span class="history-total">${order.total} FCFA</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <div style="display:flex; gap:3px; font-size:15px;">${stars}</div>
+                    <span style="font-size:12px; color:var(--text-muted);">${rating > 0 ? 'Merci!' : 'Notez'}</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+function _renderCancelledCard(order) {
+    return `
+        <div class="history-card" style="opacity:0.7;">
+            <div class="history-card-top">
+                <div>
+                    <div class="history-card-id"><i class="fas fa-receipt" style="opacity:.5; margin-right:6px;"></i>Commande #${String(order.id).slice(-6)}</div>
+                    <div class="history-card-time"><i class="fas fa-calendar"></i>${order.time}</div>
+                </div>
+                <span class="history-status-badge status-cancelled"><i class="fas fa-ban"></i> Annulée</span>
+            </div>
+            <div class="history-items">${_itemsText(order)}</div>
+            <div class="history-card-footer">
+                <span class="history-total" style="text-decoration:line-through; opacity:0.5;">${order.total} FCFA</span>
+            </div>
+        </div>`;
+}
+
+// ===== HISTORY — MAIN RENDER =====
 function renderHistory() {
     const historyList = document.getElementById('history-list');
     if (!historyList) return;
 
     if (!currentUser) {
-        historyList.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); background:var(--glass); border-radius:var(--radius); border:1px solid var(--glass-border);">Connectez-vous pour voir votre historique.</div>`;
+        historyList.innerHTML = `<div class="history-empty"><i class="fas fa-user-lock"></i>Connectez-vous pour voir votre historique.</div>`;
         return;
     }
 
     const orders = JSON.parse(localStorage.getItem('canteen_orders') || '[]');
     const myOrders = orders.filter(o => o.studentId === currentUser.studentId);
-
-    if (myOrders.length === 0) {
-        historyList.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted); background:var(--glass); border-radius:var(--radius); border:1px solid var(--glass-border);">Aucune commande passée pour le moment.</div>`;
-        return;
-    }
-
     const reviews = JSON.parse(localStorage.getItem('canteen_reviews') || '{}');
 
-    historyList.innerHTML = myOrders.map(order => {
-        const rating = reviews[order.id] || 0;
-        let starHtml = '';
-        for (let i = 1; i <= 5; i++) {
-            const isFilled = i <= rating;
-            starHtml += `<i class="fas fa-star" style="color:${isFilled ? 'var(--warning)' : 'rgba(255,255,255,0.2)'}; cursor:${rating === 0 ? 'pointer' : 'default'}; margin-right:4px;" ${rating === 0 ? `onclick="rateOrder(${order.id}, ${i})"` : ''}></i>`;
-        }
+    // Classify by status
+    const active = myOrders.filter(o => o.status === 'pending' || o.status === 'ready');
+    const done = myOrders.filter(o => o.status === 'paid');
+    const cancelled = myOrders.filter(o => o.status === 'cancelled');
 
-        const statusBadge = order.status === 'ready' ? `<span style="color:#10b981; font-size:12px; font-weight:600;"><i class="fas fa-check-circle"></i> Prêt</span>` :
-            order.status === 'paid' ? `<span style="color:#6366f1; font-size:12px; font-weight:600;"><i class="fas fa-check-circle"></i> Payé / Récupéré</span>` :
-                `<span style="color:#f59e0b; font-size:12px; font-weight:600;"><i class="fas fa-clock"></i> En préparation</span>`;
+    // Update tab badges
+    ['active', 'done', 'cancelled'].forEach((key, i) => {
+        const badge = document.getElementById('badge-' + key);
+        if (badge) badge.textContent = [active, done, cancelled][i].length;
+    });
 
-        return `
-            <div class="history-item glass-card" style="padding:16px; display:flex; flex-direction:column; gap:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <strong>Commande #${order.id}</strong>
-                        <div style="font-size:12px; color:var(--text-muted);">${order.time}</div>
-                    </div>
-                    ${statusBadge}
-                </div>
-                <div style="font-size:14px; color:var(--text-secondary);">${order.itemsDetail.map(i => `${i.emoji} ${i.name} x${i.qty}`).join(', ')}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid var(--glass-border);">
-                    <div style="font-weight:700; color:var(--primary-light);">${order.total} FCFA</div>
-                    <div class="rating-stars" style="font-size:16px;">
-                        ${starHtml}
-                        <span style="font-size:12px; color:var(--text-muted); margin-left:8px;">
-                            ${rating > 0 ? 'Merci pour votre avis!' : 'Notez votre repas'}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+    // Preserve current active tab across re-renders
+    const currentTab = document.querySelector('.history-tab.active')?.dataset.tab || 'active';
+
+    const emptyState = (icon, msg) =>
+        `<div class="history-empty"><i class="fas fa-${icon}"></i>${msg}</div>`;
+
+    historyList.innerHTML = `
+        <div class="history-panel ${currentTab === 'active' ? 'active' : ''}" id="panel-active">
+            ${active.length === 0
+                ? emptyState('hourglass', 'Aucune commande en cours.')
+                : active.map(o => _renderActiveCard(o)).join('')}
+        </div>
+        <div class="history-panel ${currentTab === 'done' ? 'active' : ''}" id="panel-done">
+            ${done.length === 0
+                ? emptyState('check-circle', 'Aucune commande terminée.')
+                : done.map(o => _renderDoneCard(o, reviews)).join('')}
+        </div>
+        <div class="history-panel ${currentTab === 'cancelled' ? 'active' : ''}" id="panel-cancelled">
+            ${cancelled.length === 0
+                ? emptyState('ban', 'Aucune commande annulée.')
+                : cancelled.map(o => _renderCancelledCard(o)).join('')}
+        </div>`;
+
+    // Start ETA ticker when active-orders tab is visible and has pending orders
+    if (currentTab === 'active' && active.some(o => o.status === 'pending' && (!o.orderDate || o.orderDate === 'today'))) {
+        _startETA();
+    } else {
+        clearInterval(_etaInterval);
+    }
 }
 
 function rateOrder(orderId, stars) {
     const reviews = JSON.parse(localStorage.getItem('canteen_reviews') || '{}');
-    if (reviews[orderId]) return; // déjà noté
-
+    if (reviews[orderId]) return; // already rated
     reviews[orderId] = stars;
     localStorage.setItem('canteen_reviews', JSON.stringify(reviews));
     showToast('⭐ Merci pour votre évaluation!');
@@ -882,6 +1124,36 @@ function renderMarketplace() {
             </div>
         </div>
     `).join('');
+}
+
+// ===== CART CONFIRM POPUP =====
+const _categoryLabels = { plat: 'Plat', accompagnement: 'Accompagnement', boisson: 'Boisson', dessert: 'Dessert' };
+let _cartConfirmTimer = null;
+
+function showCartConfirm(item) {
+    document.getElementById('cart-confirm-emoji').textContent = item.emoji;
+    document.getElementById('cart-confirm-name').textContent = item.name;
+    document.getElementById('cart-confirm-meta').textContent =
+        (_categoryLabels[item.category] || item.category) + ' — ' + item.price + ' FCFA';
+
+    const popup = document.getElementById('cart-confirm');
+    // Remove then re-add .show to restart the progress bar animation
+    popup.classList.remove('show');
+    void popup.offsetWidth;
+    popup.classList.add('show');
+
+    clearTimeout(_cartConfirmTimer);
+    _cartConfirmTimer = setTimeout(closeCartConfirm, 5000);
+}
+
+function closeCartConfirm() {
+    document.getElementById('cart-confirm').classList.remove('show');
+    clearTimeout(_cartConfirmTimer);
+}
+
+function goToCart() {
+    closeCartConfirm();
+    navigateTo('order');
 }
 
 // ===== TOAST =====

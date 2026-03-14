@@ -1,0 +1,216 @@
+/* ===== HERO 3D OVERLAY ===== */
+
+/* Canvas container — sits behind hero content, above background orbs */
+.hero-3d-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.hero-3d-overlay canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Make hero section position-relative so the overlay stacks correctly */
+.section-home {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ensure hero content stays above the 3D canvas */
+.hero-container {
+    position: relative;
+    z-index: 2;
+}
+
+/* ===== FLOATING CSS FOOD PARTICLES ===== */
+.food-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.food-particle {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0;
+    animation: particleFloat 18s ease-in-out infinite;
+    /* slower: 18s instead of 12s */
+    filter: blur(0.3px);
+    will-change: transform, opacity;
+}
+
+/* Particles positioned at edges — never over center content */
+.food-particle:nth-child(1) {
+    left: 3%;
+    top: 12%;
+    animation-delay: 0s;
+    font-size: 18px;
+}
+
+.food-particle:nth-child(2) {
+    left: 8%;
+    top: 75%;
+    animation-delay: 2.5s;
+    font-size: 14px;
+}
+
+.food-particle:nth-child(3) {
+    left: 88%;
+    top: 15%;
+    animation-delay: 5s;
+    font-size: 20px;
+}
+
+.food-particle:nth-child(4) {
+    left: 93%;
+    top: 60%;
+    animation-delay: 7.5s;
+    font-size: 16px;
+}
+
+.food-particle:nth-child(5) {
+    left: 6%;
+    top: 88%;
+    animation-delay: 1.5s;
+    font-size: 12px;
+}
+
+.food-particle:nth-child(6) {
+    left: 92%;
+    top: 8%;
+    animation-delay: 4s;
+    font-size: 18px;
+}
+
+.food-particle:nth-child(7) {
+    left: 4%;
+    top: 50%;
+    animation-delay: 6s;
+    font-size: 14px;
+}
+
+.food-particle:nth-child(8) {
+    left: 96%;
+    top: 40%;
+    animation-delay: 9s;
+    font-size: 16px;
+}
+
+@keyframes particleFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) rotate(0deg) scale(0.8);
+    }
+
+    20% {
+        opacity: 0.35;
+    }
+
+    50% {
+        opacity: 0.25;
+        transform: translateY(-25px) rotate(90deg) scale(1);
+    }
+
+    80% {
+        opacity: 0.35;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px) rotate(180deg) scale(0.8);
+    }
+}
+
+/* ===== ENHANCED DEPTH ON EXISTING HERO CARDS ===== */
+.hero-floating-card {
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Subtle shimmer effect on the hero badge — violet tint */
+.hero-badge {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-badge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(139, 92, 246, 0.1),
+            transparent);
+    animation: shimmer 6s ease-in-out infinite;
+    /* slower shimmer */
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 150%;
+    }
+
+    100% {
+        left: 150%;
+    }
+}
+
+/* Soft glow pulse behind the phone mockup — violet */
+.hero-phone-mockup {
+    position: relative;
+}
+
+.hero-phone-mockup::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 50px;
+    background: radial-gradient(ellipse at center,
+            rgba(139, 92, 246, 0.1) 0%,
+            transparent 70%);
+    animation: glowPulse 5s ease-in-out infinite alternate;
+    /* slower pulse */
+    z-index: -1;
+}
+
+@keyframes glowPulse {
+    0% {
+        opacity: 0.4;
+        transform: scale(0.97);
+    }
+
+    100% {
+        opacity: 0.8;
+        transform: scale(1.03);
+    }
+}
+
+/* ===== RESPONSIVE — HIDE 3D ON SMALL SCREENS ===== */
+@media (max-width: 768px) {
+    .hero-3d-overlay {
+        display: none;
+    }
+
+    .food-particles {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .food-particle {
+        font-size: 12px !important;
+    }
+}
